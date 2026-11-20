@@ -53,7 +53,7 @@ console.log(
     : `PQC key registered in tx ${reg.txHash}`,
 );
 
-const hash = sha256Hex(new TextEncoder().encode(message));
+const hash = sha256Hex(new TextEncoder().encode(message)).replace(/^0x/, "");
 const memo = `QORESEAL1|${hash}|${message}`;
 const result = await tx.bankSend(
   account.cosmos,

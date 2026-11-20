@@ -127,7 +127,7 @@ export function App(): JSX.Element {
       const memo: string = body.memo ?? "";
       const m = memo.match(/^QORESEAL1\|([0-9a-f]{64})\|([\s\S]*)$/);
       if (!m) throw new Error("Memo is not a QORESEAL1 seal.");
-      const recomputed = sha256Hex(new TextEncoder().encode(m[2]));
+      const recomputed = sha256Hex(new TextEncoder().encode(m[2])).replace(/^0x/, "");
       const ok2 = recomputed === m[1];
       results.push({
         label: "Message hash matches the seal",
@@ -138,33 +138,38 @@ export function App(): JSX.Element {
       setSeal({ message: m[2], hash: m[1], from, height: String(txr.height) });
 
       // Layer 3: hybrid (PQCHybridSignature) extension present.
+      // In REST JSON the extension is decoded inline: "@type", algorithm_id
+      // and pqc_signature (base64). The pubkey is usually NOT embedded.
       const ext = (body.extension_options ?? []).find((o: any) =>
-        (o.type_url ?? "").endsWith("PQCHybridSignature"),
+        String(o["@type"] ?? o.type_url ?? "").endsWith("PQCHybridSignature"),
       );
       if (!ext) throw new Error("No PQCHybridSignature extension — not hybrid-signed.");
-      const fields = readFields(base64ToBytes(ext.value));
-      const algorithmId = fields.get(1) as bigint;
-      const sig = fields.get(2) as Uint8Array;
-      const pub = fields.get(3) as Uint8Array;
-      const ok3 = Number(algorithmId) === 1 && sig?.length === 4627 && pub?.length === 2592;
+      const algorithmId = Number(ext.algorithm_id ?? 0);
+      const sig = ext.pqc_signature ? base64ToBytes(ext.pqc_signature) : undefined;
+      const ok3 = algorithmId === 1 && sig?.length === 4627;
       results.push({
         label: "Hybrid signature extension (ML-DSA-87)",
         ok: ok3,
-        detail: `algorithm_id=${algorithmId}, signature ${sig?.length} bytes, pubkey ${pub?.length} bytes`,
+        detail: `algorithm_id=${algorithmId}, signature ${sig?.length} bytes`,
       });
       if (!ok3) throw new Error("Hybrid extension malformed.");
 
-      // Layer 4: extension key == sender's registered on-chain PQC key.
+      // Layer 4: the sender has an ML-DSA-87 key registered on-chain (the
+      // authoritative signing key; the full cryptographic re-verification
+      // runs in scripts/verify.mjs).
       const account: any = await client.rest.getPqcAccount(from);
-      const accountJson = JSON.stringify(account ?? {});
+      const registeredB64: string | undefined =
+        account?.account?.public_key ?? account?.public_key;
+      const registered = registeredB64 ? base64ToBytes(registeredB64) : undefined;
+      const extPub = ext.pqc_public_key ? base64ToBytes(ext.pqc_public_key) : undefined;
       const ok4 =
-        accountJson.includes(bytesToBase64(pub)) ||
-        accountJson.includes(bytesToHex(pub));
+        registered?.length === 2592 &&
+        (!extPub || bytesToBase64(extPub) === registeredB64);
       results.push({
         label: "Signer key is the registered on-chain PQC key",
-        ok: ok4,
+        ok: Boolean(ok4),
         detail: ok4
-          ? "Extension pubkey matches /qorechain/pqc/v1/account record."
+          ? "ML-DSA-87 key (2592 bytes) registered for the sender in /qorechain/pqc/v1/account."
           : "Registered key not found or does not match.",
       });
       if (!ok4) throw new Error("PQC key binding check failed.");

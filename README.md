@@ -47,6 +47,17 @@ Anyone can verify any seal — no keys, no trust in this app:
   authInfo) and checked with `pqcVerify`. This is a complete cryptographic
   audit of the seal, independent of the chain.
 
+## Live seal on testnet
+
+The first QoreSeal seal is on-chain, created from the builder wallet
+`qor1cycgckmh2vxcclsmxlh0ee2d3c996pkqdf6nty` (ML-DSA-87 key registered):
+
+- Message: “Hello Q-Day — sealed with QoreSeal”
+- Tx: [9E5664C8…DDC5E82](https://dashboard.qorechain.io/explorer/tx/9E5664C805A6782925094A50532B573F5513C6CE2B572E88B3F59AD79DDC5E82) (height 10429594)
+- Verify it yourself: `node scripts/verify.mjs 9E5664C805A6782925094A50532B573F5513C6CE2B572E88B3F59AD79DDC5E82`
+  → all 5 layers pass, ending in **SEAL VALID**. The record also lives in
+  [`seals/`](seals/9E5664C805A6782925094A50532B573F5513C6CE2B572E88B3F59AD79DDC5E82.json).
+
 ## Run it
 
 Prerequisites: Node.js ≥ 18.
