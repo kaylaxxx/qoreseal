@@ -15,7 +15,7 @@ const EVM_RPC_URL =
   import.meta.env.VITE_QORE_EVM_RPC_URL ?? "https://evm-testnet.qore.host";
 
 // The QoreSeal demo account on qorechain-diana (testnet only).
-const DEMO_ACCOUNT = "qor1h0qqukxgzwt9pkwt4kqf0jpea2d5zhccdgecw5";
+const DEMO_ACCOUNT = "qor1cycgckmh2vxcclsmxlh0ee2d3c996pkqdf6nty";
 
 interface LayerResult {
   label: string;
