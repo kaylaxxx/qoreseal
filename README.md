@@ -58,6 +58,12 @@ The first QoreSeal seal is on-chain, created from the builder wallet
   → all 5 layers pass, ending in **SEAL VALID**. The record also lives in
   [`seals/`](seals/9E5664C805A6782925094A50532B573F5513C6CE2B572E88B3F59AD79DDC5E82.json).
 
+## Demo
+
+Naskah video demo di bawah 3 menit ada di [`DEMO.md`](DEMO.md): buka app,
+tampilkan segel live di explorer, jalankan `node scripts/verify.mjs …`
+sampai **SEAL VALID**, dan penjelasan hybrid secp256k1 + ML-DSA-87.
+
 ## Run it
 
 Prerequisites: Node.js ≥ 18.
