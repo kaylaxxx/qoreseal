@@ -100,6 +100,10 @@ scripts/setup-account.mjs  Create/load the project testnet account
 scripts/seal.mjs       Register ML-DSA-87 key + send a hybrid-signed seal
 scripts/verify.mjs     Five-layer seal verification (incl. local ML-DSA-87)
 seals/                 Public seal records (message, hash, tx hash)
+DEMO.md                Sub-3-minute demo video script
+CHANGELOG.md           Build log per day + how to verify
+vite.config.ts         Vite dev server (port 5173, /lcd proxy to testnet REST)
+.env.example           Endpoint config template (no secrets)
 ```
 
 ## Tech
